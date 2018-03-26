@@ -1,0 +1,31 @@
+a)
+Von der Racecondition wird die Variable available_resources beeinträchtigt.
+Zwischen dem lesen (in der if-Kondition) und dem inkrementieren bzw.
+dekrementieren, kann es sein, dass sie vom anderen Thread bereits verändert
+wurde. So kann es sein, dass diese Variable unter 0 fällt (falls die Anzahl
+Threads grösser ist, als die zugelassene Anzahl).
+Es könnte ausserdem sein, dass die Operation 'available_resources -= count',
+was äquivalent zu 'available_resources = available_resources - count' ist,
+"inkorrekt" ausgeführt wird. Nämlich, wenn Thread1 die Variable liest, dann
+Thread2 sie liest, dann wiederum Thread1 sie setzt und dann Thread2 sie setzt.
+Wenn beide Threads die Variable dekrementieren wollen, so wurde sie jetzt nur
+einmal dekrementiert anstatt zweimal.
+
+b)
+Wie bereits in a) erwähnt tritt die Racecondition in folgenden Zeilen auf:
+available_resources -= count;
+available_resources += count;
+Zuerst muss available_resources gelesen werden, bevor ihr Wert verändert werden
+kann. Dann wird der Wert geändert und gespeichert. Wenn aber zwischen dem Lesen
+und dem Speichern ein anderer Prozess den Wert verändert, dann wird diese
+Änderung nicht übernommen.
+Ich habe den möglichen Fehler bei der if-Kondition weggelassen und auch den
+Mutex nur auf das Assignment angewandt, da dieser Fehler nicht zu einem
+langfristigen Fehler bei available_resources führt, sondern nur dazu, dass
+zuviele Threads gleichzeitig die Resource nutzen (was im angegeben Beispiel
+ja nicht sehr schlimm ist).
+
+
+Ausserdem musste ich times auf 100'000'000 erhöhen um in meiner virtuellen(!)
+Maschine den Fehler zu sehen. Die print Statements habe ich dabei natürlich
+auskommentiert, sonst hätte es ewig gedauert.

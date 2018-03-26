@@ -22,7 +22,9 @@ int decrease_count(int count) {
 	if (available_resources < count) {
 		return -1;
 	} else {
+		pthread_mutex_lock(&mutex);
 		available_resources -= count;
+		pthread_mutex_unlock(&mutex);
 		printf("Locked %i resources, now available: %i\n" , count , available_resources);
 		return 0;
 	}
@@ -34,7 +36,9 @@ int increase_count(int count) {
 	if (count + available_resources > 5) {
 		return -1;
 	} else {
+		pthread_mutex_lock(&mutex);
 		available_resources += count;
+		pthread_mutex_unlock(&mutex);
 		printf("Freed %i resources, now available: %i\n" , count , available_resources);
 		return 0;
 	}
@@ -62,6 +66,16 @@ int main(int argc, char *argv[])
 	/* TODO: Create 2 threads that call runTimes and wait for their completion
 	 * This should generate false final count of resources every now and then
 	 * when run WITHOUT mutex or semaphore. */
+
+	pthread_mutex_init(&mutex, NULL);
+
+	pthread_create(&thread0, NULL, runTimes, NULL);
+ 	pthread_create(&thread1, NULL, runTimes, NULL);
+
+	pthread_join(thread0, NULL);
+	pthread_join(thread1, NULL);
+
+	pthread_mutex_destroy(&mutex);
 
 	printf("Currently available resources (should be 3): %i\n" , available_resources);
 
