@@ -1,0 +1,33 @@
+Ich habe alle Befehle innerhalb des Ordners 'files' durchgeführt.
+
+a)
+ls -i file1.txt
+> 456614 file1.txt
+
+b)
+ln file1.txt file2.txt
+Die inode Nummer und der Inhalt ist der gleiche.
+Wenn ich eine Datei verändere, wird auch die andere verändert.
+
+c)
+Die Datei file2.txt besteht weiter, da eine Datei erst von der Festplatte
+gelöscht wird, wenn der letzte Harte Link gelöscht wird. Ein Counter behält
+die Übersicht, wie viele Hard Links es gibt und erst wenn er auf Null steht,
+wird die Datei definitiv gelöscht.
+
+Strace listet alle System Calls auf, die von einem Befehl getätigt werden,
+bis dieser beendet ist (in unserem Fall rm). Der System Call
+unlinkat(AT_FDCWD, "file2.txt", 0) löscht den Link file2.txt auf die Datei.
+Danach sind keine Links mehr vorhanden, d.h. die Datei wird aus dem Speicher
+gelöscht.
+
+d)
+ln -s file3.txt file4.txt
+Nun haben die Links eine unterschiedliche inode Nummer.
+
+e)
+Wird file4.txt verändert, ändert sich auch file3.txt.
+Nach dem Löschen von file3.txt kann file4.txt nicht mehr geöffnet werden.
+file4.txt ist eigentlich nur ein Zeiger auf file3.txt. Wenn diese Datei nicht
+mehr existiert, kann dem Link nicht mehr gefolgt werden. Es erscheint eine
+Fehlermeldung.
